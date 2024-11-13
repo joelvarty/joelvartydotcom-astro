@@ -49,11 +49,11 @@ const PostListingClient = ({posts, locale, sitemap, isPreview}: Props) => {
 					>
 						{items.map((post) => (
 							<a href={post.url} key={post.contentID}>
-								<div className="flex-col group mb-8 md:mb-0">
-									<div className="relative h-64 w-full overflow-clip">
+								<div className="flex-col group mb-8 md:mb-0 h-full">
+									<div className="relative h-64 w-full overflow-clip ">
 										<AgilityPic
 											image={post.image}
-											className="object-cover object-center rounded-t-lg w-full"
+											className="object-cover object-center rounded-t-lg h-full"
 											fallbackWidth={800}
 											sources={[
 												//screen at least than 1280, it's 1/3 of the screen

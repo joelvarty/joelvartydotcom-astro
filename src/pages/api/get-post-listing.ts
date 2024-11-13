@@ -25,7 +25,7 @@ export async function GET({ url, request }: APIContext) {
 
 	//HACK: we are just outputting a lot of posts here for now, so we are IGNORING the skip and take vals...
 	//normally you would use skip and take to do paging on a large list.
-	const postsRes = await getPostListing({ sitemap: sitemap, isPreview, locale, skip: 0, take: 50 })
+	const postsRes = await getPostListing({ sitemap: sitemap, isPreview, locale, skip, take: 50 })
 
 
 	//HACK adjust the ids so our keys don't overlap

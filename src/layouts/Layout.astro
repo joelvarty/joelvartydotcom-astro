@@ -5,21 +5,48 @@ import SiteFooter from "../components/react/SiteFooter"
 import PreviewBar from "../components/react/PreviewBar"
 import {getHeaderContent} from "../lib/content/get-header-content"
 import type {AgilityPageProps} from "../lib/agility-cms/types/agility-page-props"
+import {createSharingImage} from "../lib/createSharingImage"
+import type {ContentItem} from "@agility/content-fetch"
 
 interface Props {
 	pageResponse: AgilityPageProps
 }
 
 const {pageResponse} = Astro.props
-const {page, sitemapNode, isPreview, languageCode, channelName, isDevelopmentMode} = pageResponse
-
-console.log("isPreview", isPreview, "isDevelopmentMode", isDevelopmentMode)
+const {page, sitemapNode, isPreview, languageCode, channelName, isDevelopmentMode, dynamicPageItem} = pageResponse
 
 //get the correct template
 const Template = page.templateName === "Main Template" ? MainTemplate : null
 
 //get the header data
 const headerData = await getHeaderContent({isPreview, locale: languageCode, sitemap: channelName})
+
+const permalink = `https://joelvarty.com${sitemapNode.path}`
+const title = `${sitemapNode.title} | joelvartydotcom`
+
+let ogImageURL = ""
+
+//try to get the ogImage from the dynamicPageItem
+if (dynamicPageItem) {
+	try {
+		if (dynamicPageItem.properties.referenceName === "posts") {
+			const imageField = dynamicPageItem.fields["image"]
+			if (imageField) {
+				ogImageURL = `${imageField.url}?format=auto&w=1200`
+			}
+		}
+	} catch (error) {
+		console.error("Error getting ogImage from dynamicPageItem", error)
+	}
+}
+
+if (!ogImageURL) {
+	//auto generate the og image if we don't have one yet
+	ogImageURL = createSharingImage({
+		cloudName: "podium-app",
+		text: sitemapNode.title,
+	})
+}
 ---
 
 <!doctype html>
@@ -30,8 +57,22 @@ const headerData = await getHeaderContent({isPreview, locale: languageCode, site
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/assets/agility-logo-triangle.svg" />
 		<meta name="generator" content={`Agility CMS + ${Astro.generator}`} />
-		<title>{sitemapNode.title} | joelvartydotcom</title>
+		<title>{title}</title>
 		<meta name="description" content={page.seo?.metaDescription} />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={permalink} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={page.seo?.metaDescription} />
+		<meta property="og:image" content={ogImageURL} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={permalink} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={page.seo?.metaDescription} />
+		<meta property="twitter:image" content={ogImageURL} />
 	</head>
 	<body>
 		<div class="flex flex-col min-h-screen">
