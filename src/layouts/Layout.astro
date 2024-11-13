@@ -1,0 +1,48 @@
+---
+import MainTemplate from "../components/agility-layouts/MainTemplate.astro"
+import SiteHeader from "../components/react/SiteHeader"
+import SiteFooter from "../components/react/SiteFooter"
+import PreviewBar from "../components/react/PreviewBar"
+import {getHeaderContent} from "../lib/content/get-header-content"
+import type {AgilityPageProps} from "../lib/agility-cms/types/agility-page-props"
+
+interface Props {
+	pageResponse: AgilityPageProps
+}
+
+const {pageResponse} = Astro.props
+const {page, sitemapNode, isPreview, languageCode, channelName, isDevelopmentMode} = pageResponse
+
+console.log("isPreview", isPreview, "isDevelopmentMode", isDevelopmentMode)
+
+//get the correct template
+const Template = page.templateName === "Main Template" ? MainTemplate : null
+
+//get the header data
+const headerData = await getHeaderContent({isPreview, locale: languageCode, sitemap: channelName})
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/assets/agility-logo-triangle.svg" />
+		<meta name="generator" content={`Agility CMS + ${Astro.generator}`} />
+		<title>{sitemapNode.title} | joelvartydotcom</title>
+		<meta name="description" content={page.seo?.metaDescription} />
+	</head>
+	<body>
+		<div class="flex flex-col min-h-screen">
+			{(isDevelopmentMode || isPreview) && <PreviewBar client:load {...{isDevelopmentMode, isPreview}} />}
+
+			<SiteHeader client:load header={headerData} />
+			<main class="flex-1">
+				{Template && <Template pageResponse={pageResponse} />}
+			</main>
+
+			<SiteFooter />
+		</div>
+	</body>
+</html>
