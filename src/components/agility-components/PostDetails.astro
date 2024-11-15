@@ -2,6 +2,7 @@
 import {DateTime} from "luxon"
 import type {AgilityComponentProps} from "../../lib/agility-cms/types/agility-component-props"
 import AgilityPic from "../AgilityPic.astro"
+import {CldImage} from "astro-cloudinary"
 
 interface Props extends AgilityComponentProps {}
 
@@ -19,22 +20,34 @@ const category = post.category?.fields.title || "Uncategorized"
 
 // format date
 const dateStr = DateTime.fromJSDate(new Date(post.date)).toFormat("LLL. dd, yyyy")
+
+const cloudinaryImage = post.cloudinaryImage ? JSON.parse(post.cloudinaryImage) : null
 ---
 
 <div class="relative px-8">
 	<div class="max-w-screen-xl mx-auto">
 		<div class="h-64 md:h-96 lg:h-[480px] relative overflow-hidden rounded-lg">
-			<AgilityPic
-				image={post.image}
-				alt={post.image.label}
-				className="w-full"
-				fallbackWidth={800}
-				sources={[
-					{media: "(min-width: 1280px)", width: 1200},
-					{media: "(min-width: 640px)", width: 800},
-					{media: "(max-width: 639px)", width: 640},
-				]}
-			/>
+			{
+				cloudinaryImage ? (
+					<CldImage
+						src={cloudinaryImage.public_id}
+						alt="Description"
+						sizes="(min-width: 1280px) 1200px,  (min-width: 640px) 800px, 640px"
+					/>
+				) : (
+					<AgilityPic
+						image={post.image}
+						alt={post.image.label}
+						className="w-full"
+						fallbackWidth={800}
+						sources={[
+							{media: "(min-width: 1280px)", width: 1200},
+							{media: "(min-width: 640px)", width: 800},
+							{media: "(max-width: 639px)", width: 640},
+						]}
+					/>
+				)
+			}
 		</div>
 		<div class="max-w-2xl mx-auto mt-4">
 			<div class="uppercase text-primary-500 text-xs font-bold tracking-widest leading-loose">{category}</div>

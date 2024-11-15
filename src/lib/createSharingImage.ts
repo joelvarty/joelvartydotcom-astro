@@ -26,5 +26,5 @@ export const createSharingImage = ({ cloudName, text }: Props) => {
 	].join(',')
 
 	const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload/`
-	return `${baseUrl}${imageTransformations}/${textTransformations}/joelvartydotcom/og-bg.png`
+	return `${baseUrl}${imageTransformations}/${textTransformations}/joelvartydotcom/jv-og-bg.png`
 }

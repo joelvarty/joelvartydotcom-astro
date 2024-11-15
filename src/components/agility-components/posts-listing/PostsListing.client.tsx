@@ -5,6 +5,7 @@ import {useState} from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import type {IPostMin} from "../../../lib/content/get-post-listing"
 import {AgilityPic} from "../../react/AgilityPic"
+import {AdvancedImage} from "@cloudinary/react"
 
 interface Props {
 	posts: IPostMin[]
@@ -47,41 +48,52 @@ const PostListingClient = ({posts, locale, sitemap, isPreview}: Props) => {
 						endMessage={<p>No more posts!</p>}
 						className="grid sm:gap-8 sm:grid-cols-2 lg:grid-cols-3"
 					>
-						{items.map((post) => (
-							<a href={post.url} key={post.contentID}>
-								<div className="flex-col group mb-8 md:mb-0 h-full">
-									<div className="relative h-64 w-full overflow-clip ">
-										<AgilityPic
-											image={post.image}
-											className="object-cover object-center rounded-t-lg h-full"
-											fallbackWidth={800}
-											sources={[
-												//screen at least than 1280, it's 1/3 of the screen
-												{
-													media: "(min-width: 1280px)",
-													width: 480,
-												},
+						{items.map((post) => {
+							const cloudinaryImage = post.cloudinaryImage
 
-												//screen at least than 640, it's 1/2 of the screen
-												{media: "(min-width: 640px)", width: 640},
-												//screen less than 640, full width of screen
-												{media: "(max-width: 639px)", width: 640},
-											]}
-										/>
-									</div>
-									<div className="bg-gray-100 p-8 border-2 border-t-0 rounded-b-lg">
-										<div className="uppercase text-primary-500 text-xs font-bold tracking-widest leading-loose">
-											{post.category}
+							return (
+								<a href={post.url} key={post.contentID}>
+									<div className="flex-col group mb-8 md:mb-0 h-full">
+										<div className="relative h-64 w-full overflow-clip ">
+											{cloudinaryImage ? (
+												<AdvancedImage
+													cldImg={post.cloudinaryImage}
+													className="object-cover object-center rounded-t-lg w-full h-full"
+												/>
+											) : (
+												<AgilityPic
+													image={post.image}
+													className="object-cover object-center rounded-t-lg w-full h-full"
+													fallbackWidth={800}
+													sources={[
+														//screen at least than 1280, it's 1/3 of the screen
+														{
+															media: "(min-width: 1280px)",
+															width: 480,
+														},
+
+														//screen at least than 640, it's 1/2 of the screen
+														{media: "(min-width: 640px)", width: 640},
+														//screen less than 640, full width of screen
+														{media: "(max-width: 639px)", width: 640},
+													]}
+												/>
+											)}
 										</div>
-										<div className="border-b-2 border-primary-500 w-8"></div>
-										<div className="mt-4 uppercase text-gray-600 italic font-semibold text-xs">{post.date}</div>
-										<h2 className="text-secondary-500 mt-1 font-black text-2xl group-hover:text-primary-500 transition duration-300">
-											{post.title}
-										</h2>
+										<div className="bg-gray-100 p-8 border-2 border-t-0 rounded-b-lg">
+											<div className="uppercase text-primary-500 text-xs font-bold tracking-widest leading-loose">
+												{post.category}
+											</div>
+											<div className="border-b-2 border-primary-500 w-8"></div>
+											<div className="mt-4 uppercase text-gray-600 italic font-semibold text-xs">{post.date}</div>
+											<h2 className="text-secondary-500 mt-1 font-black text-2xl group-hover:text-primary-500 transition duration-300">
+												{post.title}
+											</h2>
+										</div>
 									</div>
-								</div>
-							</a>
-						))}
+								</a>
+							)
+						})}
 					</InfiniteScroll>
 				</div>
 			</div>

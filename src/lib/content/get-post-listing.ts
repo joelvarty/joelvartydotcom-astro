@@ -2,6 +2,10 @@ import type { ContentList } from "@agility/content-fetch"
 import { DateTime } from "luxon"
 import type { ImageField } from "../agility-cms/types/agility-fields"
 import { getRestClient } from "../agility-cms/rest-client"
+import { AdvancedImage } from '@cloudinary/react';
+import { fill } from "@cloudinary/url-gen/actions/resize";
+import { Cloudinary } from "@cloudinary/url-gen";
+
 
 
 export interface IPostMin {
@@ -12,6 +16,7 @@ export interface IPostMin {
 	url: string
 	category: string
 	image: ImageField
+	cloudinaryImage?: any
 }
 
 interface LoadPostsProp {
@@ -22,7 +27,14 @@ interface LoadPostsProp {
 	take: number
 }
 
-export const getPostListing = async ({ sitemap, locale, isPreview, skip: _skip, take: _take }: LoadPostsProp) => {
+export const getPostListing = async ({ sitemap, locale, isPreview, skip, take }: LoadPostsProp) => {
+
+	const cld = new Cloudinary({
+		cloud: {
+			cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
+		}
+	});
+
 
 
 	//HACK: we are ignoring skip and take for now just to show how to use the CMS data
@@ -42,7 +54,8 @@ export const getPostListing = async ({ sitemap, locale, isPreview, skip: _skip, 
 			referenceName: "posts",
 			languageCode: locale,
 			contentLinkDepth: 2,
-			take: 50,
+			take,
+			skip
 		})
 
 		// resolve dynamic urls
@@ -58,6 +71,15 @@ export const getPostListing = async ({ sitemap, locale, isPreview, skip: _skip, 
 			// url
 			const url = dynamicUrls[post.contentID] || "#"
 
+			let cloudinaryImage = null
+			if (post.fields.cloudinaryImage) {
+				const obj = JSON.parse(post.fields.cloudinaryImage)
+
+				cloudinaryImage = cld.image(obj.public_id);
+
+				// Resize to 250 x 250 pixels using the 'fill' crop mode.
+				cloudinaryImage.resize(fill().width(400).height(300));
+			}
 
 			return {
 				contentID: post.contentID,
@@ -65,7 +87,8 @@ export const getPostListing = async ({ sitemap, locale, isPreview, skip: _skip, 
 				date,
 				url,
 				category,
-				image: post.fields.image
+				image: post.fields.image,
+				cloudinaryImage
 			}
 		})
 

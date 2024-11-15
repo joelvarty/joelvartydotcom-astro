@@ -7,6 +7,7 @@ import {getHeaderContent} from "../lib/content/get-header-content"
 import type {AgilityPageProps} from "../lib/agility-cms/types/agility-page-props"
 import {createSharingImage} from "../lib/createSharingImage"
 import type {ContentItem} from "@agility/content-fetch"
+import {createCompositeSharingImage} from "../lib/createCompositeSharingImage"
 
 interface Props {
 	pageResponse: AgilityPageProps
@@ -26,12 +27,27 @@ const title = `${sitemapNode.title} | joelvartydotcom`
 
 let ogImageURL = ""
 
+const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
+
 //try to get the ogImage from the dynamicPageItem
 if (dynamicPageItem) {
 	try {
 		if (dynamicPageItem.properties.referenceName === "posts") {
 			const imageField = dynamicPageItem.fields["image"]
-			if (imageField) {
+
+			const cloudinaryImage = dynamicPageItem.fields["cloudinaryImage"]
+				? JSON.parse(dynamicPageItem.fields["cloudinaryImage"])
+				: null
+
+			if (cloudinaryImage) {
+				//create a composite image based on the blog post and the title
+				ogImageURL = createCompositeSharingImage({
+					cloudName,
+					cloudinaryImage,
+					overlayText: sitemapNode.title,
+				})
+			} else if (imageField) {
+				//crete a sharing image based on the page title
 				ogImageURL = `${imageField.url}?format=auto&w=1200`
 			}
 		}
@@ -43,10 +59,12 @@ if (dynamicPageItem) {
 if (!ogImageURL) {
 	//auto generate the og image if we don't have one yet
 	ogImageURL = createSharingImage({
-		cloudName: "podium-app",
+		cloudName,
 		text: sitemapNode.title,
 	})
 }
+
+console.log("ogImageURL", ogImageURL)
 ---
 
 <!doctype html>
